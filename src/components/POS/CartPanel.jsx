@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePOS } from '../../context/POSContext';
+import WeightedModal from './WeightedModal';
 import {
   Trash2,
   Plus,
@@ -10,11 +11,14 @@ import {
   AlertTriangle,
   Pill,
   Calendar,
-  X
+  X,
+  Scale
 } from 'lucide-react';
 import { formatCurrency, getExpiryStatus } from '../../utils/helpers';
 
 export default function CartPanel({ onOpenCheckout, isMobileOpen, onCloseMobile }) {
+  const [weightedEditItem, setWeightedEditItem] = useState(null);
+
   const {
     cart,
     updateCartQuantity,
@@ -137,31 +141,76 @@ export default function CartPanel({ onOpenCheckout, isMobileOpen, onCloseMobile 
 
                 {/* Quantity and Item Total Control */}
                 <div className="flex items-center justify-between pt-1 border-t border-slate-800/60">
-                  <div className="flex items-center gap-1 bg-slate-950 rounded-xl border border-slate-800 p-1">
-                    <button
-                      onClick={() => updateCartQuantity(item.id, item.selectedBatch, item.quantity - 1)}
-                      className="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold flex items-center justify-center text-xs"
-                    >
-                      <Minus className="w-3 h-3" />
-                    </button>
-                    <span className="w-8 text-center font-black text-xs text-white">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => updateCartQuantity(item.id, item.selectedBatch, item.quantity + 1)}
-                      className="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold flex items-center justify-center text-xs"
-                    >
-                      <Plus className="w-3 h-3" />
-                    </button>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1 bg-slate-950 rounded-xl border border-slate-800 p-1">
+                      <button
+                        onClick={() => {
+                          const step = item.isWeighted ? 0.100 : 1;
+                          const minAllowed = item.minWeight || (item.isWeighted ? 0.050 : 1);
+                          const nextVal = Number((item.quantity - step).toFixed(3));
+                          if (nextVal < minAllowed) {
+                            removeFromCart(item.id, item.selectedBatch);
+                          } else {
+                            updateCartQuantity(item.id, item.selectedBatch, nextVal);
+                          }
+                        }}
+                        className="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold flex items-center justify-center text-xs"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          if (item.isWeighted) setWeightedEditItem(item);
+                        }}
+                        title={item.isWeighted ? 'انقر لتعديل الوزن بالجرامات' : ''}
+                        className={`min-w-[48px] px-1 text-center font-black text-xs text-white ${
+                          item.isWeighted ? 'hover:text-amber-400 cursor-pointer underline decoration-dotted' : ''
+                        }`}
+                      >
+                        {item.isWeighted ? `${item.quantity.toFixed(3)}كجم` : item.quantity}
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          const step = item.isWeighted ? 0.100 : 1;
+                          const nextVal = Number((item.quantity + step).toFixed(3));
+                          updateCartQuantity(item.id, item.selectedBatch, nextVal);
+                        }}
+                        className="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold flex items-center justify-center text-xs"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+
+                    {/* Scale Edit Trigger for Weighted Items */}
+                    {item.isWeighted && (
+                      <button
+                        onClick={() => setWeightedEditItem(item)}
+                        className="p-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition"
+                        title="تعديل الوزن بالجرامات والميزان"
+                      >
+                        <Scale className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
 
                   <div className="text-left">
-                    <div className="text-xs text-slate-400">
-                      {formatCurrency(item.price)} x {item.quantity}
+                    <div className="text-[11px] text-slate-400">
+                      {item.isWeighted ? (
+                        <span>{formatCurrency(item.price)}/كجم × {item.quantity.toFixed(3)}كجم</span>
+                      ) : (
+                        <span>{formatCurrency(item.price)} × {item.quantity}</span>
+                      )}
                     </div>
                     <div className="font-extrabold text-sm text-emerald-400">
                       {formatCurrency(itemTotal)}
                     </div>
+                    {item.isWeighted && (
+                      <div className="text-[10px] text-amber-400/80 font-bold">
+                        ({(item.quantity * 1000).toFixed(0)} جرام)
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -169,6 +218,14 @@ export default function CartPanel({ onOpenCheckout, isMobileOpen, onCloseMobile 
           })
         )}
       </div>
+
+      {/* Weighted Precision Edit Modal */}
+      {weightedEditItem && (
+        <WeightedModal
+          product={weightedEditItem}
+          onClose={() => setWeightedEditItem(null)}
+        />
+      )}
 
       {/* Cart Summary Footer */}
       <div className="p-4 bg-slate-900/90 border-t border-slate-800 space-y-3">

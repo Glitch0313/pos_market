@@ -174,22 +174,32 @@ export function POSProvider({ children }) {
         (item) => item.id === product.id && item.selectedBatch === batchToUse
       );
 
+      const minAllowed = product.minWeight || (product.isWeighted ? 0.050 : 1);
+      if (product.isWeighted && qtyToAdd < minAllowed) {
+        alert(`أدنى كمية/وزن مسموح بطلبه لهذا الصنف هو ${minAllowed} كجم (${(minAllowed * 1000).toFixed(0)} جرام)`);
+        qtyToAdd = minAllowed;
+      }
+
       if (existingIndex > -1) {
         const updated = [...prevCart];
         const currentQty = updated[existingIndex].quantity;
-        if (currentQty + qtyToAdd > product.stock) {
+        const newQty = product.isWeighted && qtyToAdd !== 1
+          ? Number(qtyToAdd.toFixed(3))
+          : Number((currentQty + qtyToAdd).toFixed(3));
+
+        if (newQty > product.stock) {
           triggerAudio('error');
           alert(`لا يمكن تجاوز الكمية المتاحة بالرصيد (${product.stock})`);
           return prevCart;
         }
-        updated[existingIndex].quantity += qtyToAdd;
+        updated[existingIndex].quantity = newQty;
         return updated;
       } else {
         return [
           ...prevCart,
           {
             ...product,
-            quantity: qtyToAdd,
+            quantity: Number(qtyToAdd.toFixed(3)),
             itemDiscount: 0,
             selectedBatch: batchToUse,
             batchInfo: product.batches
@@ -209,16 +219,25 @@ export function POSProvider({ children }) {
     }
 
     const prod = products.find((p) => p.id === productId);
-    if (prod && newQty > prod.stock) {
-      triggerAudio('error');
-      alert(`الكمية المطلوبة أكبر من الرصيد المتوفر (${prod.stock})`);
-      return;
+    let targetQty = Number(Number(newQty).toFixed(3));
+
+    if (prod) {
+      const minAllowed = prod.minWeight || (prod.isWeighted ? 0.050 : 1);
+      if (prod.isWeighted && targetQty < minAllowed) {
+        alert(`أدنى كمية مسموح بطلبها من هذا الصنف هي ${minAllowed} كجم (${(minAllowed * 1000).toFixed(0)} جرام)`);
+        targetQty = minAllowed;
+      }
+      if (targetQty > prod.stock) {
+        triggerAudio('error');
+        alert(`الكمية المطلوبة أكبر من الرصيد المتوفر (${prod.stock})`);
+        return;
+      }
     }
 
     setCart((prev) =>
       prev.map((item) => {
         if (item.id === productId && item.selectedBatch === batchNo) {
-          return { ...item, quantity: newQty };
+          return { ...item, quantity: targetQty };
         }
         return item;
       })
