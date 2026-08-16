@@ -75,24 +75,41 @@ body {
   animation: pulseGlow 2s infinite ease-in-out;
 }
 
-/* Print thermal receipt styling */
+/* Print thermal receipt & reports styling */
 @media print {
-  body * {
-    visibility: hidden;
+  @page {
+    margin: 0;
+    size: auto;
   }
-  #thermal-receipt-printable, #thermal-receipt-printable * {
-    visibility: visible;
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  #thermal-receipt-printable,
+  #thermal-receipt-printable * {
+    visibility: visible !important;
   }
   #thermal-receipt-printable {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 80mm;
-    margin: 0 auto;
-    padding: 10px;
-    font-size: 12px;
-    font-family: 'Cairo', monospace;
-    color: #000;
-    background: #fff;
+    position: absolute !important;
+    left: 50% !important;
+    top: 0 !important;
+    transform: translateX(-50%) !important;
+    width: 80mm !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 auto !important;
+    padding: 8px !important;
+    font-size: 11px !important;
+    font-family: 'Cairo', sans-serif !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
   }
 }

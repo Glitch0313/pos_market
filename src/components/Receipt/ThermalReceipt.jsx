@@ -1,8 +1,11 @@
 import React from 'react';
+import { usePOS } from '../../context/POSContext';
 import { Printer, X, CheckCircle2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
 export default function ThermalReceipt({ saleRecord, onClose }) {
+  const { storeInfo } = usePOS();
+
   if (!saleRecord) return null;
 
   const handlePrintNow = () => {
@@ -25,15 +28,22 @@ export default function ThermalReceipt({ saleRecord, onClose }) {
         </div>
 
         {/* Printable Thermal Receipt Card */}
-        <div className="p-4 bg-white text-slate-950 font-sans text-xs overflow-y-auto max-h-[70vh] space-y-3" id="thermal-receipt-printable">
+        <div className="p-4 bg-white text-slate-950 font-sans text-xs overflow-y-auto max-h-[70vh] space-y-3 print-container" id="thermal-receipt-printable">
           
           {/* Store Logo & Header */}
           <div className="text-center space-y-1 border-b border-slate-300 pb-3">
-            <h1 className="font-black text-base text-slate-900 tracking-tight">
-              {saleRecord.mode === 'pharmacy' ? '💊 صيدلية فارما برو' : '🛒 سوبر ماركت البركة'}
+            <h1 className="font-black text-base text-slate-900 tracking-tight flex items-center justify-center gap-1.5">
+              <span>{storeInfo?.logo || (saleRecord.mode === 'pharmacy' ? '💊' : '🛒')}</span>
+              <span>{storeInfo?.name || (saleRecord.mode === 'pharmacy' ? 'صيدلية فارما برو' : 'سوبر ماركت البركة')}</span>
             </h1>
-            <p className="text-[11px] text-slate-600">فرع القاهرة الرئيسي - هاتف: 01000000000</p>
-            <p className="text-[10px] text-slate-500 font-mono">س.ت: 9942100 | الرقم الضريبي: 30098412</p>
+            <p className="text-[11px] text-slate-600">
+              {storeInfo?.address || 'الفرع الرئيسي'} - هاتف: {storeInfo?.phone || '01000000000'}
+            </p>
+            {storeInfo?.taxNo && (
+              <p className="text-[10px] text-slate-500 font-mono">
+                الرقم الضريبي / السجل: {storeInfo.taxNo}
+              </p>
+            )}
           </div>
 
           {/* Invoice Meta Details */}
@@ -139,7 +149,9 @@ export default function ThermalReceipt({ saleRecord, onClose }) {
             <div className="w-20 h-20 bg-slate-200 border border-slate-300 mx-auto flex items-center justify-center text-[9px] font-mono text-slate-600">
               [QR-CODE ZATCA]
             </div>
-            <p className="text-[10px] text-slate-500">شكراً لزيارتكم! نتمنى لكم الصحة والعافية</p>
+            <p className="text-[10px] text-slate-600 font-bold">
+              {storeInfo?.receiptFooter || 'شكراً لزيارتكم! نتمنى لكم الصحة والعافية'}
+            </p>
           </div>
         </div>
 

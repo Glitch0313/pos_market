@@ -3,12 +3,26 @@ import { Camera, Barcode, X, Zap, CheckCircle2 } from 'lucide-react';
 import { usePOS } from '../../context/POSContext';
 
 export default function CameraScannerModal({ onClose, onScanComplete }) {
-  const { products, addToCart } = usePOS();
+  const { products, addToCart, activeMode, systemScope } = usePOS();
   const [simulatedCode, setSimulatedCode] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
 
+  // Compute effective operating mode based on system deployment scope
+  const effectiveMode = systemScope === 'pharmacy_only'
+    ? 'pharmacy'
+    : systemScope === 'market_only'
+    ? 'market'
+    : activeMode;
+
+  // Filter products strictly based on effective operating mode
+  const scopedProducts = products.filter((p) => {
+    if (effectiveMode === 'pharmacy' && p.type !== 'pharmacy') return false;
+    if (effectiveMode === 'market' && p.type !== 'market') return false;
+    return true;
+  });
+
   const handleSimulatedScan = (code) => {
-    const target = products.find((p) => p.barcode === code || p.code === code);
+    const target = scopedProducts.find((p) => p.barcode === code || p.code === code);
     if (target) {
       addToCart(target);
       setStatusMessage(`تم قراءة الباركود بنجاح: ${target.name}`);
@@ -65,7 +79,7 @@ export default function CameraScannerModal({ onClose, onScanComplete }) {
           </h3>
 
           <div className="grid grid-cols-2 gap-2">
-            {products.slice(0, 4).map((p) => (
+            {scopedProducts.slice(0, 4).map((p) => (
               <button
                 key={p.id}
                 onClick={() => handleSimulatedScan(p.barcode)}
