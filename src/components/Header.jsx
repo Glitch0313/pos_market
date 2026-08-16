@@ -13,10 +13,11 @@ import {
   UserCheck,
   ShieldAlert,
   Menu,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 
-export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNavOpen }) {
+export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNavOpen, onLockSession }) {
   const {
     activeMode,
     setActiveMode,
@@ -172,6 +173,18 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
           >
             {theme === 'dark' ? <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" /> : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-400" />}
           </button>
+
+          {/* Lock System Button */}
+          {onLockSession && (
+            <button
+              onClick={onLockSession}
+              className="p-1.5 sm:p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 transition flex items-center gap-1"
+              title="قفل الشاشة والنظام"
+            >
+              <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-400" />
+              <span className="text-xs font-bold hidden md:inline">قفل</span>
+            </button>
+          )}
 
         </div>
       </div>

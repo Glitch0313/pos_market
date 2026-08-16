@@ -7,6 +7,7 @@ import InventoryScreen from './components/Inventory/InventoryScreen';
 import ShiftModal from './components/Shift/ShiftModal';
 import ReportsScreen from './components/Reports/ReportsScreen';
 import ThermalReceipt from './components/Receipt/ThermalReceipt';
+import LoginScreen from './components/Auth/LoginScreen';
 import { PauseCircle, Play, Trash2, X } from 'lucide-react';
 import { formatCurrency } from './utils/helpers';
 
@@ -17,6 +18,26 @@ function POSAppContent() {
   const [isHeldCartsModalOpen, setIsHeldCartsModalOpen] = useState(false);
   const [activeReceiptSale, setActiveReceiptSale] = useState(null);
 
+  // System Lock & Authentication State
+  const [isLocked, setIsLocked] = useState(() => {
+    return sessionStorage.getItem('pos_locked') === 'true' || !sessionStorage.getItem('pos_authenticated');
+  });
+
+  const handleLoginSuccess = () => {
+    setIsLocked(false);
+    sessionStorage.setItem('pos_authenticated', 'true');
+    sessionStorage.setItem('pos_locked', 'false');
+  };
+
+  const handleLockSession = () => {
+    setIsLocked(true);
+    sessionStorage.setItem('pos_locked', 'true');
+  };
+
+  if (isLocked) {
+    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="h-screen bg-slate-950 text-slate-100 flex flex-col font-sans overflow-hidden">
       
@@ -25,6 +46,7 @@ function POSAppContent() {
         onOpenHeldCarts={() => setIsHeldCartsModalOpen(true)}
         onToggleMobileNav={() => setIsMobileNavOpen(!isMobileNavOpen)}
         isMobileNavOpen={isMobileNavOpen}
+        onLockSession={handleLockSession}
       />
 
       {/* Main Layout Container */}
