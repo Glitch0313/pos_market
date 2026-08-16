@@ -12,9 +12,9 @@ import {
 } from 'lucide-react';
 
 export default function Navigation({ isMobileOpen, onCloseMobile }) {
-  const { activeTab, setActiveTab, cart, enableAlMaida, systemScope } = usePOS();
+  const { activeTab, setActiveTab, cart, enableAlMaida, systemScope, activeMode } = usePOS();
 
-  const showAlMaidaTab = enableAlMaida && systemScope !== 'pharmacy_only';
+  const showAlMaidaTab = enableAlMaida && systemScope !== 'pharmacy_only' && activeMode !== 'pharmacy';
 
   const navItems = [
     { id: 'pos', label: 'نقطة البيع (الكاشير)', icon: ShoppingCart, badge: cart.length > 0 ? cart.length : null },

@@ -173,46 +173,48 @@ export default function AddProductModal({ initialProduct, onClose }) {
             </div>
           </div>
 
-          {/* Weighted Item Toggle & Minimum Order Weight Field */}
-          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isWeighted"
-                checked={formData.isWeighted || false}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    isWeighted: e.target.checked,
-                    unit: e.target.checked ? 'كيلو' : formData.unit
-                  })
-                }
-                className="w-4 h-4 accent-amber-500 rounded cursor-pointer"
-              />
-              <label htmlFor="isWeighted" className="font-bold text-amber-300 text-xs cursor-pointer">
-                ⚖️ صنف يباع بالوزن والميزان (السعر المحدد هو سعر الكيلو)
-              </label>
-            </div>
-
-            {formData.isWeighted && (
-              <div className="space-y-1 pt-1 border-t border-amber-500/20">
-                <label className="font-bold text-slate-300 text-xs block">
-                  أدنى كمية / وزن مسموح بطلبها (كجم):
-                </label>
+          {/* Weighted Item Toggle & Minimum Order Weight Field (Supermarket Market Only) */}
+          {formData.type === 'market' && (
+            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-3">
+              <div className="flex items-center gap-2">
                 <input
-                  type="number"
-                  step="0.025"
-                  value={formData.minWeight}
-                  onChange={(e) => setFormData({ ...formData, minWeight: Number(e.target.value) || 0.05 })}
-                  placeholder="مثال: 0.125 كجم (125 جرام)"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-bold focus:outline-none focus:border-amber-500 text-xs"
+                  type="checkbox"
+                  id="isWeighted"
+                  checked={formData.isWeighted || false}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      isWeighted: e.target.checked,
+                      unit: e.target.checked ? 'كيلو' : formData.unit
+                    })
+                  }
+                  className="w-4 h-4 accent-amber-500 rounded cursor-pointer"
                 />
-                <span className="text-[10px] text-slate-400 block">
-                  {(Number(formData.minWeight || 0) * 1000).toFixed(0)} جرام كحد أدنى عند الشراء
-                </span>
+                <label htmlFor="isWeighted" className="font-bold text-amber-300 text-xs cursor-pointer">
+                  ⚖️ صنف يباع بالوزن والميزان (السعر المحدد هو سعر الكيلو)
+                </label>
               </div>
-            )}
-          </div>
+
+              {formData.isWeighted && (
+                <div className="space-y-1 pt-1 border-t border-amber-500/20">
+                  <label className="font-bold text-slate-300 text-xs block">
+                    أدنى كمية / وزن مسموح بطلبها (كجم):
+                  </label>
+                  <input
+                    type="number"
+                    step="0.025"
+                    value={formData.minWeight}
+                    onChange={(e) => setFormData({ ...formData, minWeight: Number(e.target.value) || 0.05 })}
+                    placeholder="مثال: 0.125 كجم (125 جرام)"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-bold focus:outline-none focus:border-amber-500 text-xs"
+                  />
+                  <span className="text-[10px] text-slate-400 block">
+                    {(Number(formData.minWeight || 0) * 1000).toFixed(0)} جرام كحد أدنى عند الشراء
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Pricing & Stock */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-2xl bg-slate-900/60 border border-slate-800">
