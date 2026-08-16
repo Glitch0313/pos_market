@@ -1,0 +1,180 @@
+import React, { useState, useEffect } from 'react';
+import { usePOS } from '../context/POSContext';
+import {
+  ShoppingBag,
+  Pill,
+  Layers,
+  Sun,
+  Moon,
+  Volume2,
+  VolumeX,
+  PauseCircle,
+  Clock,
+  UserCheck,
+  ShieldAlert,
+  Menu,
+  X
+} from 'lucide-react';
+
+export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNavOpen }) {
+  const {
+    activeMode,
+    setActiveMode,
+    theme,
+    toggleTheme,
+    shift,
+    heldCarts,
+    soundEnabled,
+    setSoundEnabled,
+    triggerAudio
+  } = usePOS();
+
+  const [time, setTime] = useState(new Date().toLocaleTimeString('ar-EG'));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(new Date().toLocaleTimeString('ar-EG'));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleModeChange = (newMode) => {
+    setActiveMode(newMode);
+    triggerAudio('beep');
+  };
+
+  return (
+    <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80 px-3 py-2.5 sm:px-6">
+      <div className="flex items-center justify-between gap-2 sm:gap-4">
+        
+        {/* Brand & Mobile Menu Toggle */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onToggleMobileNav}
+            className="md:hidden p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+            aria-label="Toggle Menu"
+          >
+            {isMobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-black text-xl">
+              {activeMode === 'pharmacy' ? '💊' : activeMode === 'market' ? '🛒' : '⚡'}
+            </div>
+            <div>
+              <h1 className="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
+                <span>فارما ماركت</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  PRO
+                </span>
+              </h1>
+              <p className="text-[11px] text-slate-400 hidden sm:block">
+                نظام إدارة الكاشير والمخزون الذكي
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mode Switcher Buttons (Supermarket vs Pharmacy vs Hybrid) */}
+        <div className="hidden lg:flex items-center p-1 bg-slate-900/90 rounded-2xl border border-slate-800">
+          <button
+            onClick={() => handleModeChange('market')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
+              activeMode === 'market'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/30'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <ShoppingBag className="w-4 h-4" />
+            <span>سوبر ماركت</span>
+          </button>
+
+          <button
+            onClick={() => handleModeChange('pharmacy')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
+              activeMode === 'pharmacy'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/30'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Pill className="w-4 h-4" />
+            <span>صيدلية تخصصية</span>
+          </button>
+
+          <button
+            onClick={() => handleModeChange('hybrid')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
+              activeMode === 'hybrid'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/30'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>نظام مدمج</span>
+          </button>
+        </div>
+
+        {/* Actions & Shift Indicator */}
+        <div className="flex items-center gap-1.5 sm:gap-3">
+
+          {/* Mobile Quick Mode Toggle Selector */}
+          <select
+            value={activeMode}
+            onChange={(e) => handleModeChange(e.target.value)}
+            className="lg:hidden bg-slate-800 text-slate-200 text-xs font-bold rounded-xl px-2 py-1.5 border border-slate-700 focus:outline-none"
+          >
+            <option value="pharmacy">💊 صيدلية</option>
+            <option value="market">🛒 ماركت</option>
+            <option value="hybrid">⚡ مدمج</option>
+          </select>
+
+          {/* Held Carts Notification Button */}
+          {heldCarts.length > 0 && (
+            <button
+              onClick={onOpenHeldCarts}
+              className="relative p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition flex items-center gap-1"
+              title="الفواتير المعلقة"
+            >
+              <PauseCircle className="w-5 h-5 animate-pulse" />
+              <span className="text-xs font-bold hidden sm:inline">معلقة</span>
+              <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-extrabold text-[11px] flex items-center justify-center">
+                {heldCarts.length}
+              </span>
+            </button>
+          )}
+
+          {/* Live Clock & Shift Badge */}
+          <div className="hidden sm:flex flex-col items-end text-xs">
+            <span className="font-bold text-slate-200 flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-emerald-400" />
+              {time}
+            </span>
+            <span className="text-[10px] text-slate-400 flex items-center gap-1">
+              <UserCheck className="w-3 h-3 text-cyan-400" />
+              {shift.cashierName}
+            </span>
+          </div>
+
+          {/* Sound Toggle */}
+          <button
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            className="p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+            title={soundEnabled ? 'كتم الصوت' : 'تفعيل الصوت'}
+          >
+            {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-rose-400" />}
+          </button>
+
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+            title="تغيير الثيم"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+          </button>
+
+        </div>
+      </div>
+    </header>
+  );
+}

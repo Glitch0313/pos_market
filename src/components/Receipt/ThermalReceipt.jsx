@@ -1,0 +1,165 @@
+import React from 'react';
+import { Printer, X, CheckCircle2 } from 'lucide-react';
+import { formatCurrency, formatDate } from '../../utils/helpers';
+
+export default function ThermalReceipt({ saleRecord, onClose }) {
+  if (!saleRecord) return null;
+
+  const handlePrintNow = () => {
+    window.print();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
+      <div className="w-full max-w-sm glass-panel rounded-3xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]">
+        
+        {/* Top Header Controls */}
+        <div className="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+          <span className="font-extrabold text-xs text-emerald-400">معاينة الفاتورة الحرارية</span>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Printable Thermal Receipt Card */}
+        <div className="p-4 bg-white text-slate-950 font-sans text-xs overflow-y-auto max-h-[70vh] space-y-3" id="thermal-receipt-printable">
+          
+          {/* Store Logo & Header */}
+          <div className="text-center space-y-1 border-b border-slate-300 pb-3">
+            <h1 className="font-black text-base text-slate-900 tracking-tight">
+              {saleRecord.mode === 'pharmacy' ? '💊 صيدلية فارما برو' : '🛒 سوبر ماركت البركة'}
+            </h1>
+            <p className="text-[11px] text-slate-600">فرع القاهرة الرئيسي - هاتف: 01000000000</p>
+            <p className="text-[10px] text-slate-500 font-mono">س.ت: 9942100 | الرقم الضريبي: 30098412</p>
+          </div>
+
+          {/* Invoice Meta Details */}
+          <div className="text-[11px] space-y-0.5 border-b border-slate-300 pb-2">
+            <div className="flex justify-between font-bold">
+              <span>رقم الفاتورة:</span>
+              <span className="font-mono">{saleRecord.id}</span>
+            </div>
+            <div className="flex justify-between text-slate-700">
+              <span>التاريخ والوقت:</span>
+              <span>{formatDate(saleRecord.date)}</span>
+            </div>
+            <div className="flex justify-between text-slate-700">
+              <span>الكاشير:</span>
+              <span>{saleRecord.cashier}</span>
+            </div>
+            {saleRecord.customer && (
+              <div className="flex justify-between text-slate-700">
+                <span>العميل:</span>
+                <span>{saleRecord.customer.name}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Items Table */}
+          <table className="w-full text-right text-[11px] border-b border-slate-300 pb-2">
+            <thead>
+              <tr className="border-b border-slate-200 font-bold text-slate-800">
+                <th className="py-1">الصنف</th>
+                <th className="py-1 text-center">الكمية</th>
+                <th className="py-1 text-left">الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {saleRecord.items.map((item, idx) => (
+                <tr key={idx} className="py-1">
+                  <td className="py-1.5">
+                    <span className="font-bold text-slate-900 block">{item.name}</span>
+                    {item.selectedBatch && (
+                      <span className="text-[9px] text-slate-500 block font-mono">
+                        تشغيلة: {item.selectedBatch} {item.batchInfo ? `(انتهاء: ${item.batchInfo.expiryDate})` : ''}
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-1.5 text-center font-bold text-slate-800">
+                    {item.quantity}
+                  </td>
+                  <td className="py-1.5 text-left font-black text-slate-900">
+                    {formatCurrency((item.price - (item.itemDiscount || 0)) * item.quantity)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Totals Summary */}
+          <div className="space-y-1 text-[11px] pt-1">
+            <div className="flex justify-between">
+              <span>المجموع الفرعي:</span>
+              <span>{formatCurrency(saleRecord.subtotal)}</span>
+            </div>
+            {saleRecord.discount > 0 && (
+              <div className="flex justify-between text-rose-600 font-bold">
+                <span>الخصم:</span>
+                <span>- {formatCurrency(saleRecord.discount)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-black text-sm text-slate-900 border-t border-b border-slate-300 py-1">
+              <span>الصافي المطلوب:</span>
+              <span>{formatCurrency(saleRecord.total)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>طريقة الدفع:</span>
+              <span className="font-bold">{saleRecord.paymentMethod}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>المبلغ المدفوع:</span>
+              <span>{formatCurrency(saleRecord.paidAmount)}</span>
+            </div>
+            {saleRecord.changeDue > 0 && (
+              <div className="flex justify-between font-bold text-slate-900">
+                <span>الباقي للعميل:</span>
+                <span>{formatCurrency(saleRecord.changeDue)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Prescription / Patient Info if present */}
+          {saleRecord.prescriptionNote && (saleRecord.prescriptionNote.doctorName || saleRecord.prescriptionNote.patientName) && (
+            <div className="p-2 rounded bg-slate-100 border border-slate-200 text-[10px] space-y-0.5">
+              <span className="font-bold text-slate-800 block">إرشادات الطبيب والروشتة:</span>
+              {saleRecord.prescriptionNote.doctorName && (
+                <div>الطبيب: {saleRecord.prescriptionNote.doctorName}</div>
+              )}
+              {saleRecord.prescriptionNote.patientName && (
+                <div>المريض: {saleRecord.prescriptionNote.patientName}</div>
+              )}
+            </div>
+          )}
+
+          {/* Mock QR Code for ZATCA / e-Invoice */}
+          <div className="pt-2 text-center space-y-1">
+            <div className="w-20 h-20 bg-slate-200 border border-slate-300 mx-auto flex items-center justify-center text-[9px] font-mono text-slate-600">
+              [QR-CODE ZATCA]
+            </div>
+            <p className="text-[10px] text-slate-500">شكراً لزيارتكم! نتمنى لكم الصحة والعافية</p>
+          </div>
+        </div>
+
+        {/* Modal Footer Actions */}
+        <div className="p-3 bg-slate-900 border-t border-slate-800 flex gap-2">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs hover:bg-slate-700"
+          >
+            إغلاق
+          </button>
+          <button
+            onClick={handlePrintNow}
+            className="flex-2 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs hover:bg-emerald-400 flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20"
+          >
+            <Printer className="w-4 h-4" />
+            <span>طباعة الفاتورة الآن</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
