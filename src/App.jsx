@@ -49,7 +49,7 @@ function POSAppContent() {
 
           {activeTab === 'shift' && <ShiftModal />}
 
-          {activeTab === 'reports' && (
+          {(activeTab === 'reports' || activeTab === 'sales') && (
             <ReportsScreen
               onPrintInvoice={(saleRecord) => setActiveReceiptSale(saleRecord)}
             />
