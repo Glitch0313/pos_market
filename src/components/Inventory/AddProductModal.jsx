@@ -42,9 +42,9 @@ export default function AddProductModal({ initialProduct, onClose }) {
       costPrice: Number(formData.costPrice) || 0,
       stock: Number(formData.stock) || 0,
       minStock: Number(formData.minStock) || 0,
-      batches: formData.type === 'pharmacy' ? [
+      batches: (formData.type === 'pharmacy' || formData.expiryDate) ? [
         {
-          batchNo: formData.batchNo || 'B-DEFAULT',
+          batchNo: formData.batchNo || 'B-' + Math.floor(1000 + Math.random() * 9000),
           expiryDate: formData.expiryDate || '2027-12-31',
           stock: Number(formData.stock) || 0
         }
@@ -205,7 +205,38 @@ export default function AddProductModal({ initialProduct, onClose }) {
             </div>
           </div>
 
-          {/* Pharmacy Special Fields (Active Ingredient, Batches, Dosage Form) */}
+          {/* Expiry Date & Batch Info Section (For both Pharmacy & Market Food/Beverages) */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-900/90 border border-slate-800 space-y-3">
+            <div className="flex items-center gap-1.5 text-amber-400 font-bold">
+              <Pill className="w-4 h-4" />
+              <span>تاريخ الصلاحية ورقم التشغيلة (Batch & Expiry Date):</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-300">رقم التشغيلة (Batch / Lot No)</label>
+                <input
+                  type="text"
+                  value={formData.batchNo}
+                  onChange={(e) => setFormData({ ...formData, batchNo: e.target.value })}
+                  placeholder="مثال: B-2026-90"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 font-mono text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-300">تاريخ انتهاء الصلاحية 📅</label>
+                <input
+                  type="date"
+                  value={formData.expiryDate}
+                  onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-400 font-bold focus:outline-none focus:border-amber-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Pharmacy Special Fields (Active Ingredient, Dosage Form) */}
           {formData.type === 'pharmacy' && (
             <div className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-900/50 space-y-3">
               <div className="flex items-center gap-1.5 text-cyan-400 font-bold">
@@ -240,26 +271,6 @@ export default function AddProductModal({ initialProduct, onClose }) {
                     <option value="قطرة">قطرة (Drops)</option>
                     <option value="فوار">فوار (Effervescent)</option>
                   </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-300">رقم التشغيلة (Batch No)</label>
-                  <input
-                    type="text"
-                    value={formData.batchNo}
-                    onChange={(e) => setFormData({ ...formData, batchNo: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 font-mono text-white focus:outline-none focus:border-cyan-500"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-300">تاريخ انتهاء الصلاحية</label>
-                  <input
-                    type="date"
-                    value={formData.expiryDate}
-                    onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
-                  />
                 </div>
               </div>
             </div>

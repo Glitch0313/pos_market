@@ -45,26 +45,26 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
 
   return (
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800/80 px-3 py-2.5 sm:px-6">
-      <div className="flex items-center justify-between gap-2 sm:gap-4">
+      <div className="flex items-center justify-between gap-1.5 sm:gap-4">
         
         {/* Brand & Mobile Menu Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           <button
             onClick={onToggleMobileNav}
-            className="md:hidden p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+            className="md:hidden p-1.5 sm:p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition"
             aria-label="Toggle Menu"
           >
-            {isMobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isMobileNavOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5" />}
           </button>
 
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-black text-xl">
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-black text-base sm:text-xl flex-shrink-0">
               {activeMode === 'pharmacy' ? '💊' : activeMode === 'market' ? '🛒' : '⚡'}
             </div>
             <div>
-              <h1 className="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
-                <span>فارما ماركت</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <h1 className="font-extrabold text-xs sm:text-lg tracking-tight text-white flex items-center gap-1">
+                <span className="whitespace-nowrap">فارما ماركت</span>
+                <span className="text-[9px] sm:text-xs px-1.5 py-0.2 sm:py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden xs:inline-block">
                   PRO
                 </span>
               </h1>
@@ -75,7 +75,7 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
           </div>
         </div>
 
-        {/* Mode Switcher Buttons (Supermarket vs Pharmacy vs Hybrid) */}
+        {/* Mode Switcher Buttons (Supermarket vs Pharmacy vs Hybrid) - Desktop */}
         <div className="hidden lg:flex items-center p-1 bg-slate-900/90 rounded-2xl border border-slate-800">
           <button
             onClick={() => handleModeChange('market')}
@@ -115,13 +115,13 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
         </div>
 
         {/* Actions & Shift Indicator */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
 
           {/* Mobile Quick Mode Toggle Selector */}
           <select
             value={activeMode}
             onChange={(e) => handleModeChange(e.target.value)}
-            className="lg:hidden bg-slate-800 text-slate-200 text-xs font-bold rounded-xl px-2 py-1.5 border border-slate-700 focus:outline-none"
+            className="lg:hidden bg-slate-800 text-slate-200 text-[11px] sm:text-xs font-bold rounded-xl px-1.5 py-1 sm:px-2 sm:py-1.5 border border-slate-700 focus:outline-none max-w-[95px] sm:max-w-none"
           >
             <option value="pharmacy">💊 صيدلية</option>
             <option value="market">🛒 ماركت</option>
@@ -132,12 +132,12 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
           {heldCarts.length > 0 && (
             <button
               onClick={onOpenHeldCarts}
-              className="relative p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition flex items-center gap-1"
+              className="relative p-1.5 sm:p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 hover:bg-amber-500/25 transition flex items-center gap-1"
               title="الفواتير المعلقة"
             >
-              <PauseCircle className="w-5 h-5 animate-pulse" />
-              <span className="text-xs font-bold hidden sm:inline">معلقة</span>
-              <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-extrabold text-[11px] flex items-center justify-center">
+              <PauseCircle className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
+              <span className="text-xs font-bold hidden md:inline">معلقة</span>
+              <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] sm:text-[11px] flex items-center justify-center">
                 {heldCarts.length}
               </span>
             </button>
@@ -158,19 +158,19 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
           {/* Sound Toggle */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+            className="p-1.5 sm:p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition"
             title={soundEnabled ? 'كتم الصوت' : 'تفعيل الصوت'}
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-rose-400" />}
+            {soundEnabled ? <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" /> : <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-400" />}
           </button>
 
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+            className="p-1.5 sm:p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition hidden xs:block"
             title="تغيير الثيم"
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" /> : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-400" />}
           </button>
 
         </div>
