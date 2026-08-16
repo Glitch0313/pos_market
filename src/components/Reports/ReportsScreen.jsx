@@ -15,11 +15,15 @@ import {
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
 export default function ReportsScreen({ onPrintInvoice }) {
-  const { salesHistory } = usePOS();
+  const { salesHistory, systemScope } = usePOS();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMode, setSelectedMode] = useState('all');
 
   const filteredSales = salesHistory.filter((s) => {
+    // Scope filter
+    if (systemScope === 'pharmacy_only' && s.mode === 'market') return false;
+    if (systemScope === 'market_only' && s.mode === 'pharmacy') return false;
+
     if (selectedMode !== 'all' && s.mode !== selectedMode) return false;
     if (!searchTerm.trim()) return true;
     const term = searchTerm.toLowerCase();
@@ -67,39 +71,41 @@ export default function ReportsScreen({ onPrintInvoice }) {
           </p>
         </div>
 
-        {/* Mode Selector */}
-        <div className="flex bg-slate-900 p-1 rounded-2xl border border-slate-800 text-xs font-bold">
-          <button
-            onClick={() => setSelectedMode('all')}
-            className={`px-3 py-1.5 rounded-xl transition ${
-              selectedMode === 'all'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                : 'text-slate-400'
-            }`}
-          >
-            الكل
-          </button>
-          <button
-            onClick={() => setSelectedMode('pharmacy')}
-            className={`px-3 py-1.5 rounded-xl transition ${
-              selectedMode === 'pharmacy'
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                : 'text-slate-400'
-            }`}
-          >
-            💊 مبيعات الصيدلية
-          </button>
-          <button
-            onClick={() => setSelectedMode('market')}
-            className={`px-3 py-1.5 rounded-xl transition ${
-              selectedMode === 'market'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                : 'text-slate-400'
-            }`}
-          >
-            🛒 مبيعات الماركت
-          </button>
-        </div>
+        {/* Mode Selector (Only shown in full hybrid mode) */}
+        {systemScope === 'full_hybrid' && (
+          <div className="flex bg-slate-900 p-1 rounded-2xl border border-slate-800 text-xs font-bold">
+            <button
+              onClick={() => setSelectedMode('all')}
+              className={`px-3 py-1.5 rounded-xl transition ${
+                selectedMode === 'all'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  : 'text-slate-400'
+              }`}
+            >
+              الكل
+            </button>
+            <button
+              onClick={() => setSelectedMode('pharmacy')}
+              className={`px-3 py-1.5 rounded-xl transition ${
+                selectedMode === 'pharmacy'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                  : 'text-slate-400'
+              }`}
+            >
+              💊 مبيعات الصيدلية
+            </button>
+            <button
+              onClick={() => setSelectedMode('market')}
+              className={`px-3 py-1.5 rounded-xl transition ${
+                selectedMode === 'market'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  : 'text-slate-400'
+              }`}
+            >
+              🛒 مبيعات الماركت
+            </button>
+          </div>
+        )}
       </div>
 
       {/* KPI Cards */}

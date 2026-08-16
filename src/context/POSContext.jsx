@@ -66,10 +66,54 @@ export function POSProvider({ children }) {
     instructions: ''
   });
 
+  // Current User Account State
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = sessionStorage.getItem('pos_current_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  // System Scope (Stand-alone delivery presets: 'full_hybrid', 'pharmacy_only', 'market_only')
+  const [systemScope, setSystemScope] = useState(() => {
+    return localStorage.getItem('pos_system_scope') || 'full_hybrid';
+  });
+
+  // Option for "قسم المائدة والتلاجة" (Deli Counter tab in Supermarket)
+  const [enableAlMaida, setEnableAlMaida] = useState(() => {
+    const saved = localStorage.getItem('pos_enable_almaida');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
   // Audio mute setting
   const [soundEnabled, setSoundEnabled] = useState(true);
 
+  // Sync Current User Role & Scope
+  useEffect(() => {
+    if (currentUser) {
+      sessionStorage.setItem('pos_current_user', JSON.stringify(currentUser));
+      if (currentUser.role === 'pharmacy') {
+        setSystemScope('pharmacy_only');
+        setActiveMode('pharmacy');
+      } else if (currentUser.role === 'market') {
+        setSystemScope('market_only');
+        setActiveMode('market');
+      }
+    }
+  }, [currentUser]);
+
   // Save changes to LocalStorage
+  useEffect(() => {
+    localStorage.setItem('pos_system_scope', systemScope);
+    if (systemScope === 'pharmacy_only') {
+      setActiveMode('pharmacy');
+    } else if (systemScope === 'market_only') {
+      setActiveMode('market');
+    }
+  }, [systemScope]);
+
+  useEffect(() => {
+    localStorage.setItem('pos_enable_almaida', JSON.stringify(enableAlMaida));
+  }, [enableAlMaida]);
+
   useEffect(() => {
     localStorage.setItem('pos_mode', activeMode);
   }, [activeMode]);
@@ -376,7 +420,13 @@ export function POSProvider({ children }) {
         setPrescriptionNote,
         soundEnabled,
         setSoundEnabled,
-        triggerAudio
+        triggerAudio,
+        systemScope,
+        setSystemScope,
+        enableAlMaida,
+        setEnableAlMaida,
+        currentUser,
+        setCurrentUser
       }}
     >
       {children}

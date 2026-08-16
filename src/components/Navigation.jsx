@@ -7,14 +7,18 @@ import {
   Users,
   Clock,
   BarChart3,
-  Sparkles
+  Sparkles,
+  UtensilsCrossed
 } from 'lucide-react';
 
 export default function Navigation({ isMobileOpen, onCloseMobile }) {
-  const { activeTab, setActiveTab, cart } = usePOS();
+  const { activeTab, setActiveTab, cart, enableAlMaida, systemScope } = usePOS();
+
+  const showAlMaidaTab = enableAlMaida && systemScope !== 'pharmacy_only';
 
   const navItems = [
     { id: 'pos', label: 'نقطة البيع (الكاشير)', icon: ShoppingCart, badge: cart.length > 0 ? cart.length : null },
+    ...(showAlMaidaTab ? [{ id: 'almaida', label: 'قسم المائدة والتلاجة', icon: UtensilsCrossed }] : []),
     { id: 'inventory', label: 'إدارة المخزون', icon: Package },
     { id: 'sales', label: 'سجل المبيعات', icon: Receipt },
     { id: 'shift', label: 'إغلاق الوردية', icon: Clock },

@@ -8,14 +8,17 @@ import ShiftModal from './components/Shift/ShiftModal';
 import ReportsScreen from './components/Reports/ReportsScreen';
 import ThermalReceipt from './components/Receipt/ThermalReceipt';
 import LoginScreen from './components/Auth/LoginScreen';
+import AlMaidaScreen from './components/POS/AlMaidaScreen';
+import SettingsModal from './components/Settings/SettingsModal';
 import { PauseCircle, Play, Trash2, X } from 'lucide-react';
 import { formatCurrency } from './utils/helpers';
 
 function POSAppContent() {
-  const { activeTab, heldCarts, restoreHeldCart } = usePOS();
+  const { activeTab, heldCarts, restoreHeldCart, setCurrentUser } = usePOS();
   
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isHeldCartsModalOpen, setIsHeldCartsModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeReceiptSale, setActiveReceiptSale] = useState(null);
 
   // System Lock & Authentication State
@@ -23,10 +26,13 @@ function POSAppContent() {
     return sessionStorage.getItem('pos_locked') === 'true' || !sessionStorage.getItem('pos_authenticated');
   });
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (userObj) => {
     setIsLocked(false);
     sessionStorage.setItem('pos_authenticated', 'true');
     sessionStorage.setItem('pos_locked', 'false');
+    if (userObj) {
+      setCurrentUser(userObj);
+    }
   };
 
   const handleLockSession = () => {
@@ -47,6 +53,7 @@ function POSAppContent() {
         onToggleMobileNav={() => setIsMobileNavOpen(!isMobileNavOpen)}
         isMobileNavOpen={isMobileNavOpen}
         onLockSession={handleLockSession}
+        onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
       {/* Main Layout Container */}
@@ -66,6 +73,8 @@ function POSAppContent() {
               onPrintReceiptTrigger={(saleRecord) => setActiveReceiptSale(saleRecord)}
             />
           )}
+
+          {activeTab === 'almaida' && <AlMaidaScreen />}
 
           {activeTab === 'inventory' && <InventoryScreen />}
 
@@ -130,6 +139,11 @@ function POSAppContent() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* System Settings Modal */}
+      {isSettingsOpen && (
+        <SettingsModal onClose={() => setIsSettingsOpen(false)} />
       )}
 
       {/* Thermal Receipt Print Preview Modal */}

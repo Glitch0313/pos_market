@@ -14,10 +14,11 @@ import {
   ShieldAlert,
   Menu,
   X,
-  Lock
+  Lock,
+  Settings
 } from 'lucide-react';
 
-export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNavOpen, onLockSession }) {
+export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNavOpen, onLockSession, onOpenSettings }) {
   const {
     activeMode,
     setActiveMode,
@@ -27,7 +28,9 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
     heldCarts,
     soundEnabled,
     setSoundEnabled,
-    triggerAudio
+    triggerAudio,
+    systemScope,
+    currentUser
   } = usePOS();
 
   const [time, setTime] = useState(new Date().toLocaleTimeString('ar-EG'));
@@ -64,70 +67,84 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
             </div>
             <div>
               <h1 className="font-extrabold text-xs sm:text-lg tracking-tight text-white flex items-center gap-1">
-                <span className="whitespace-nowrap">فارما ماركت</span>
+                <span className="whitespace-nowrap">
+                  {systemScope === 'pharmacy_only'
+                    ? 'صيدلية فارما'
+                    : systemScope === 'market_only'
+                    ? 'سوبرماركت البركة'
+                    : 'فارما ماركت'}
+                </span>
                 <span className="text-[9px] sm:text-xs px-1.5 py-0.2 sm:py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden xs:inline-block">
                   PRO
                 </span>
               </h1>
               <p className="text-[11px] text-slate-400 hidden sm:block">
-                نظام إدارة الكاشير والمخزون الذكي
+                {systemScope === 'pharmacy_only'
+                  ? 'نظام إدارة الصيدليات والروشتات الذكي'
+                  : systemScope === 'market_only'
+                  ? 'نظام إدارة السوبرماركت والميزان الذكي'
+                  : 'نظام إدارة الكاشير والمخزون الذكي'}
               </p>
             </div>
           </div>
         </div>
 
         {/* Mode Switcher Buttons (Supermarket vs Pharmacy vs Hybrid) - Desktop */}
-        <div className="hidden lg:flex items-center p-1 bg-slate-900/90 rounded-2xl border border-slate-800">
-          <button
-            onClick={() => handleModeChange('market')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
-              activeMode === 'market'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/30'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <ShoppingBag className="w-4 h-4" />
-            <span>سوبر ماركت</span>
-          </button>
+        {systemScope === 'full_hybrid' && (
+          <div className="hidden lg:flex items-center p-1 bg-slate-900/90 rounded-2xl border border-slate-800">
+            <button
+              onClick={() => handleModeChange('market')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                activeMode === 'market'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>سوبر ماركت</span>
+            </button>
 
-          <button
-            onClick={() => handleModeChange('pharmacy')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
-              activeMode === 'pharmacy'
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/30'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Pill className="w-4 h-4" />
-            <span>صيدلية تخصصية</span>
-          </button>
+            <button
+              onClick={() => handleModeChange('pharmacy')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                activeMode === 'pharmacy'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Pill className="w-4 h-4" />
+              <span>صيدلية تخصصية</span>
+            </button>
 
-          <button
-            onClick={() => handleModeChange('hybrid')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
-              activeMode === 'hybrid'
-                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/30'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>نظام مدمج</span>
-          </button>
-        </div>
+            <button
+              onClick={() => handleModeChange('hybrid')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                activeMode === 'hybrid'
+                  ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md shadow-purple-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              <span>نظام مدمج</span>
+            </button>
+          </div>
+        )}
 
         {/* Actions & Shift Indicator */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
 
           {/* Mobile Quick Mode Toggle Selector */}
-          <select
-            value={activeMode}
-            onChange={(e) => handleModeChange(e.target.value)}
-            className="lg:hidden bg-slate-800 text-slate-200 text-[11px] sm:text-xs font-bold rounded-xl px-1.5 py-1 sm:px-2 sm:py-1.5 border border-slate-700 focus:outline-none max-w-[95px] sm:max-w-none"
-          >
-            <option value="pharmacy">💊 صيدلية</option>
-            <option value="market">🛒 ماركت</option>
-            <option value="hybrid">⚡ مدمج</option>
-          </select>
+          {systemScope === 'full_hybrid' && (
+            <select
+              value={activeMode}
+              onChange={(e) => handleModeChange(e.target.value)}
+              className="lg:hidden bg-slate-800 text-slate-200 text-[11px] sm:text-xs font-bold rounded-xl px-1.5 py-1 sm:px-2 sm:py-1.5 border border-slate-700 focus:outline-none max-w-[95px] sm:max-w-none"
+            >
+              <option value="pharmacy">💊 صيدلية</option>
+              <option value="market">🛒 ماركت</option>
+              <option value="hybrid">⚡ مدمج</option>
+            </select>
+          )}
 
           {/* Held Carts Notification Button */}
           {heldCarts.length > 0 && (
@@ -173,6 +190,17 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
           >
             {theme === 'dark' ? <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" /> : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-400" />}
           </button>
+
+          {/* System Deployment Settings Button (Admin Only) */}
+          {onOpenSettings && currentUser?.role === 'admin' && (
+            <button
+              onClick={onOpenSettings}
+              className="p-1.5 sm:p-2 rounded-xl bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+              title="إعدادات وتخصيص تسليم النظام (للأدمن فقط)"
+            >
+              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
+            </button>
+          )}
 
           {/* Lock System Button */}
           {onLockSession && (

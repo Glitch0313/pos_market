@@ -354,6 +354,120 @@ export const INITIAL_PRODUCTS = [
     minStock: 8,
     isWeighted: false,
     image: '🧼'
+  },
+
+  // ==================== AL-MAIDA DELI PRODUCTS (منتجات المائدة والتلاجة بالوزن) ====================
+  {
+    id: 'md-1',
+    code: '3001',
+    barcode: '6221003001',
+    name: 'جبنة رومي قديمة فاخرة (بالوزن)',
+    type: 'market',
+    category: 'قسم المائدة والتلاجة',
+    unit: 'كيلو',
+    price: 280.00,
+    costPrice: 220.00,
+    stock: 25.5,
+    minStock: 5,
+    isWeighted: true,
+    isDeli: true,
+    image: '🧀'
+  },
+  {
+    id: 'md-2',
+    code: '3002',
+    barcode: '6221003002',
+    name: 'لانشون بقر بالبهارات أطياب (بالوزن)',
+    type: 'market',
+    category: 'قسم المائدة والتلاجة',
+    unit: 'كيلو',
+    price: 220.00,
+    costPrice: 175.00,
+    stock: 18.0,
+    minStock: 4,
+    isWeighted: true,
+    isDeli: true,
+    image: '🥩'
+  },
+  {
+    id: 'md-3',
+    code: '3003',
+    barcode: '6221003003',
+    name: 'جبنة بيضاء براميلي بلدي (بالوزن)',
+    type: 'market',
+    category: 'قسم المائدة والتلاجة',
+    unit: 'كيلو',
+    price: 160.00,
+    costPrice: 125.00,
+    stock: 30.0,
+    minStock: 5,
+    isWeighted: true,
+    isDeli: true,
+    image: '🧀'
+  },
+  {
+    id: 'md-4',
+    code: '3004',
+    barcode: '6221003004',
+    name: 'بسطرمة بلدي فاخرة بدون ثوم (بالوزن)',
+    type: 'market',
+    category: 'قسم المائدة والتلاجة',
+    unit: 'كيلو',
+    price: 450.00,
+    costPrice: 360.00,
+    stock: 12.0,
+    minStock: 3,
+    isWeighted: true,
+    isDeli: true,
+    image: '🥓'
+  },
+  {
+    id: 'md-5',
+    code: '3005',
+    barcode: '6221003005',
+    name: 'زيتون أسود إسباني جامبو (بالوزن)',
+    type: 'market',
+    category: 'قسم المائدة والتلاجة',
+    unit: 'كيلو',
+    price: 140.00,
+    costPrice: 105.00,
+    stock: 22.0,
+    minStock: 5,
+    isWeighted: true,
+    isDeli: true,
+    image: '🫒'
+  },
+  {
+    id: 'md-6',
+    code: '3006',
+    barcode: '6221003006',
+    name: 'جبنة شيدر أصفر مستورد (بالوزن)',
+    type: 'market',
+    category: 'قسم المائدة والتلاجة',
+    unit: 'كيلو',
+    price: 320.00,
+    costPrice: 250.00,
+    stock: 15.0,
+    minStock: 3,
+    isWeighted: true,
+    isDeli: true,
+    image: '🧀'
+  },
+  {
+    id: 'md-7',
+    code: '3007',
+    barcode: '6221003007',
+    name: 'لانشون دجاج سادة (بالوزن)',
+    type: 'market',
+    category: 'قسم المائدة والتلاجة',
+    unit: 'كيلو',
+    price: 190.00,
+    costPrice: 145.00,
+    stock: 20.0,
+    minStock: 4,
+    isWeighted: true,
+    isDeli: true,
+    image: '🍗'
   }
 ];
 
@@ -365,6 +479,6 @@ export const INITIAL_CUSTOMERS = [
 ];
 
 export const CATEGORIES = {
-  market: ['الكل', 'ألبان وأجبان', 'بقالة ومواد غذائية', 'تسالي ومقرمشات', 'مشروبات ومياه', 'خضار وفواكه', 'منظفات وعناية شخصية'],
+  market: ['الكل', 'قسم المائدة والتلاجة', 'ألبان وأجبان', 'بقالة ومواد غذائية', 'تسالي ومقرمشات', 'مشروبات ومياه', 'خضار وفواكه', 'منظفات وعناية شخصية'],
   pharmacy: ['الكل', 'مسكنات وخافض حرارة', 'مضادات حيوية', 'مضادات التهاب ومسكنات', 'أدوية البرد والإنفلونزا', 'أدوية الأطفال', 'الجهاز الهضمي والمعدة', 'فيتامينات ومكملات']
 };

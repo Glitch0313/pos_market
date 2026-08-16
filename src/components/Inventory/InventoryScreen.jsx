@@ -16,25 +16,32 @@ import {
 import { formatCurrency, getExpiryStatus } from '../../utils/helpers';
 
 export default function InventoryScreen() {
-  const { products, activeMode } = usePOS();
+  const { products, activeMode, systemScope } = usePOS();
 
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all'); // 'all', 'low_stock', 'near_expiry', 'pharmacy', 'market'
   const [editingProduct, setEditingProduct] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Computed stats
-  const totalStockCount = products.reduce((acc, p) => acc + (p.stock || 0), 0);
-  const totalStockValue = products.reduce((acc, p) => acc + (p.price * p.stock || 0), 0);
-  const lowStockCount = products.filter((p) => p.stock <= p.minStock).length;
+  // Enforce system scope products filter
+  const scopedProducts = products.filter((p) => {
+    if (systemScope === 'pharmacy_only' && p.type !== 'pharmacy') return false;
+    if (systemScope === 'market_only' && p.type !== 'market') return false;
+    return true;
+  });
 
-  const nearExpiryCount = products.filter((p) => {
+  // Computed stats
+  const totalStockCount = scopedProducts.reduce((acc, p) => acc + (p.stock || 0), 0);
+  const totalStockValue = scopedProducts.reduce((acc, p) => acc + (p.price * p.stock || 0), 0);
+  const lowStockCount = scopedProducts.filter((p) => p.stock <= p.minStock).length;
+
+  const nearExpiryCount = scopedProducts.filter((p) => {
     if (p.type !== 'pharmacy' || !p.batches) return false;
     return p.batches.some((b) => getExpiryStatus(b.expiryDate).status !== 'normal');
   }).length;
 
   // Filter products
-  const filteredProducts = products.filter((p) => {
+  const filteredProducts = scopedProducts.filter((p) => {
     // Mode filter if selected
     if (filterType === 'pharmacy' && p.type !== 'pharmacy') return false;
     if (filterType === 'market' && p.type !== 'market') return false;
@@ -88,7 +95,7 @@ export default function InventoryScreen() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="p-4 rounded-2xl glass-panel border border-slate-800 space-y-1">
           <span className="text-xs text-slate-400 font-bold block">إجمالي عدد المنتجات</span>
-          <span className="text-xl sm:text-2xl font-black text-white">{products.length} أصناف</span>
+          <span className="text-xl sm:text-2xl font-black text-white">{scopedProducts.length} أصناف</span>
           <span className="text-[10px] text-slate-500 block">إجمالي الكمية: {totalStockCount} قطعة</span>
         </div>
 
@@ -128,8 +135,12 @@ export default function InventoryScreen() {
             { id: 'all', label: 'الكل' },
             { id: 'low_stock', label: '⚠️ قرب النفاذ' },
             { id: 'near_expiry', label: '⏳ قرب الصلاحية' },
-            { id: 'pharmacy', label: '💊 أدوية' },
-            { id: 'market', label: '🛒 سوبرماركت' }
+            ...(systemScope === 'full_hybrid'
+              ? [
+                  { id: 'pharmacy', label: '💊 أدوية' },
+                  { id: 'market', label: '🛒 سوبرماركت' }
+                ]
+              : [])
           ].map((f) => (
             <button
               key={f.id}

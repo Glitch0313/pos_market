@@ -4,20 +4,30 @@ import { X, Plus, Save, Package, Pill, AlertCircle } from 'lucide-react';
 import { CATEGORIES } from '../../data/initialData';
 
 export default function AddProductModal({ initialProduct, onClose }) {
-  const { saveProduct, activeMode } = usePOS();
+  const { saveProduct, activeMode, systemScope } = usePOS();
+
+  const defaultType = initialProduct?.type || (
+    systemScope === 'pharmacy_only'
+      ? 'pharmacy'
+      : systemScope === 'market_only'
+      ? 'market'
+      : activeMode === 'pharmacy'
+      ? 'pharmacy'
+      : 'market'
+  );
 
   const [formData, setFormData] = useState({
     id: initialProduct?.id || null,
     name: initialProduct?.name || '',
     barcode: initialProduct?.barcode || String(Math.floor(6220000000 + Math.random() * 9999999)),
-    type: initialProduct?.type || (activeMode === 'pharmacy' ? 'pharmacy' : 'market'),
-    category: initialProduct?.category || (activeMode === 'pharmacy' ? 'مسكنات وخافض حرارة' : 'بقالة ومواد غذائية'),
+    type: defaultType,
+    category: initialProduct?.category || (defaultType === 'pharmacy' ? 'مسكنات وخافض حرارة' : 'بقالة ومواد غذائية'),
     price: initialProduct?.price || 10,
     costPrice: initialProduct?.costPrice || 7,
     stock: initialProduct?.stock || 50,
     minStock: initialProduct?.minStock || 10,
     unit: initialProduct?.unit || 'عبوة',
-    image: initialProduct?.image || (activeMode === 'pharmacy' ? '💊' : '📦'),
+    image: initialProduct?.image || (defaultType === 'pharmacy' ? '💊' : '📦'),
     // Pharmacy specific fields
     activeIngredient: initialProduct?.activeIngredient || '',
     dosageForm: initialProduct?.dosageForm || 'أقراص',
@@ -78,35 +88,37 @@ export default function AddProductModal({ initialProduct, onClose }) {
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 text-xs sm:text-sm">
           
-          {/* Item Type Switcher (Pharmacy vs Market) */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-800">
-            <span className="font-bold text-slate-300">نوع المنتج المستهدف:</span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, type: 'market', image: '📦' })}
-                className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 ${
-                  formData.type === 'market'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                    : 'text-slate-400'
-                }`}
-              >
-                <span>🛒 سوبرماركت</span>
-              </button>
+          {/* Item Type Switcher (Pharmacy vs Market) - Only shown in full hybrid scope */}
+          {systemScope === 'full_hybrid' && (
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-800">
+              <span className="font-bold text-slate-300">نوع المنتج المستهدف:</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, type: 'market', image: '📦' })}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 ${
+                    formData.type === 'market'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      : 'text-slate-400'
+                  }`}
+                >
+                  <span>🛒 سوبرماركت</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, type: 'pharmacy', image: '💊' })}
-                className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 ${
-                  formData.type === 'pharmacy'
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                    : 'text-slate-400'
-                }`}
-              >
-                <span>💊 دواء / صيدلية</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, type: 'pharmacy', image: '💊' })}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 ${
+                    formData.type === 'pharmacy'
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                      : 'text-slate-400'
+                  }`}
+                >
+                  <span>💊 دواء / صيدلية</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* General Product Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

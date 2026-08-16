@@ -20,7 +20,7 @@ import {
 import { formatCurrency, getExpiryStatus } from '../../utils/helpers';
 
 export default function ProductGrid({ onOpenAlternatives, onOpenWeightedModal, onOpenScanner }) {
-  const { products, activeMode, setActiveMode, addToCart } = usePOS();
+  const { products, activeMode, setActiveMode, addToCart, systemScope } = usePOS();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('الكل');
@@ -28,6 +28,13 @@ export default function ProductGrid({ onOpenAlternatives, onOpenWeightedModal, o
 
   const searchInputRef = useRef(null);
   const categoriesScrollRef = useRef(null);
+
+  // Compute effective operating mode based on system deployment scope
+  const effectiveMode = systemScope === 'pharmacy_only'
+    ? 'pharmacy'
+    : systemScope === 'market_only'
+    ? 'market'
+    : activeMode;
 
   // Keyboard shortcut listener for F2 (Focus Barcode/Search)
   useEffect(() => {
@@ -53,9 +60,9 @@ export default function ProductGrid({ onOpenAlternatives, onOpenWeightedModal, o
 
   // Filter products by mode & categories & search text
   const filteredProducts = products.filter((product) => {
-    // Mode filter
-    if (activeMode === 'market' && product.type !== 'market') return false;
-    if (activeMode === 'pharmacy' && product.type !== 'pharmacy') return false;
+    // Scope & Mode filter
+    if (effectiveMode === 'market' && product.type !== 'market') return false;
+    if (effectiveMode === 'pharmacy' && product.type !== 'pharmacy') return false;
 
     // Category filter
     if (selectedCategory !== 'الكل' && product.category !== selectedCategory) {
@@ -82,7 +89,7 @@ export default function ProductGrid({ onOpenAlternatives, onOpenWeightedModal, o
   const handleSearchSubmit = (e) => {
     if (e.key === 'Enter' && searchTerm.trim()) {
       e.preventDefault();
-      const exactMatch = products.find(
+      const exactMatch = filteredProducts.find(
         (p) => p.barcode === searchTerm.trim() || p.code === searchTerm.trim()
       );
       if (exactMatch) {
@@ -96,17 +103,17 @@ export default function ProductGrid({ onOpenAlternatives, onOpenWeightedModal, o
     }
   };
 
-  const categoriesList = activeMode === 'market'
+  const categoriesList = effectiveMode === 'market'
     ? CATEGORIES.market
-    : activeMode === 'pharmacy'
+    : effectiveMode === 'pharmacy'
     ? CATEGORIES.pharmacy
     : [...new Set([...CATEGORIES.market, ...CATEGORIES.pharmacy])];
 
   // Helper to count items per category in active mode
   const getCategoryItemCount = (catName) => {
     return products.filter((p) => {
-      if (activeMode === 'market' && p.type !== 'market') return false;
-      if (activeMode === 'pharmacy' && p.type !== 'pharmacy') return false;
+      if (effectiveMode === 'market' && p.type !== 'market') return false;
+      if (effectiveMode === 'pharmacy' && p.type !== 'pharmacy') return false;
       if (catName === 'الكل') return true;
       return p.category === catName;
     }).length;
@@ -154,53 +161,55 @@ export default function ProductGrid({ onOpenAlternatives, onOpenWeightedModal, o
 
       {/* Mode Quick Filter & Search Options Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-        {/* Active Mode Quick Switch Buttons */}
-        <div className="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
-          <button
-            onClick={() => {
-              setActiveMode('pharmacy');
-              setSelectedCategory('الكل');
-            }}
-            className={`px-3 py-1 rounded-xl font-bold flex items-center gap-1 transition ${
-              activeMode === 'pharmacy'
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Pill className="w-3.5 h-3.5" />
-            <span>الصيدلية ({products.filter((p) => p.type === 'pharmacy').length})</span>
-          </button>
+        {/* Active Mode Quick Switch Buttons (Only shown in full hybrid mode) */}
+        {systemScope === 'full_hybrid' && (
+          <div className="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-2xl border border-slate-800">
+            <button
+              onClick={() => {
+                setActiveMode('pharmacy');
+                setSelectedCategory('الكل');
+              }}
+              className={`px-3 py-1 rounded-xl font-bold flex items-center gap-1 transition ${
+                activeMode === 'pharmacy'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Pill className="w-3.5 h-3.5" />
+              <span>الصيدلية ({products.filter((p) => p.type === 'pharmacy').length})</span>
+            </button>
 
-          <button
-            onClick={() => {
-              setActiveMode('market');
-              setSelectedCategory('الكل');
-            }}
-            className={`px-3 py-1 rounded-xl font-bold flex items-center gap-1 transition ${
-              activeMode === 'market'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <ShoppingBag className="w-3.5 h-3.5" />
-            <span>السوبرماركت ({products.filter((p) => p.type === 'market').length})</span>
-          </button>
+            <button
+              onClick={() => {
+                setActiveMode('market');
+                setSelectedCategory('الكل');
+              }}
+              className={`px-3 py-1 rounded-xl font-bold flex items-center gap-1 transition ${
+                activeMode === 'market'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>السوبرماركت ({products.filter((p) => p.type === 'market').length})</span>
+            </button>
 
-          <button
-            onClick={() => {
-              setActiveMode('hybrid');
-              setSelectedCategory('الكل');
-            }}
-            className={`px-3 py-1 rounded-xl font-bold flex items-center gap-1 transition ${
-              activeMode === 'hybrid'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>عرض الكل ({products.length})</span>
-          </button>
-        </div>
+            <button
+              onClick={() => {
+                setActiveMode('hybrid');
+                setSelectedCategory('الكل');
+              }}
+              className={`px-3 py-1 rounded-xl font-bold flex items-center gap-1 transition ${
+                activeMode === 'hybrid'
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>عرض الكل ({products.length})</span>
+            </button>
+          </div>
+        )}
 
         {/* Pharmacy Search Type Selector */}
         {(activeMode === 'pharmacy' || activeMode === 'hybrid') && (
