@@ -30,7 +30,8 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
     setSoundEnabled,
     triggerAudio,
     systemScope,
-    currentUser
+    currentUser,
+    storeInfo
   } = usePOS();
 
   const [time, setTime] = useState(new Date().toLocaleTimeString('ar-EG'));
@@ -63,27 +64,19 @@ export default function Header({ onOpenHeldCarts, onToggleMobileNav, isMobileNav
 
           <div className="flex items-center gap-1.5 sm:gap-2.5">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-black text-base sm:text-xl flex-shrink-0">
-              {activeMode === 'pharmacy' ? '💊' : activeMode === 'market' ? '🛒' : '⚡'}
+              {storeInfo?.logo || (activeMode === 'pharmacy' ? '💊' : activeMode === 'market' ? '🛒' : '⚡')}
             </div>
             <div>
               <h1 className="font-extrabold text-xs sm:text-lg tracking-tight text-white flex items-center gap-1">
                 <span className="whitespace-nowrap">
-                  {systemScope === 'pharmacy_only'
-                    ? 'صيدلية فارما'
-                    : systemScope === 'market_only'
-                    ? 'سوبرماركت البركة'
-                    : 'فارما ماركت'}
+                  {storeInfo?.name || (systemScope === 'pharmacy_only' ? 'صيدلية فارما' : systemScope === 'market_only' ? 'سوبرماركت البركة' : 'فارما ماركت')}
                 </span>
                 <span className="text-[9px] sm:text-xs px-1.5 py-0.2 sm:py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden xs:inline-block">
                   PRO
                 </span>
               </h1>
               <p className="text-[11px] text-slate-400 hidden sm:block">
-                {systemScope === 'pharmacy_only'
-                  ? 'نظام إدارة الصيدليات والروشتات الذكي'
-                  : systemScope === 'market_only'
-                  ? 'نظام إدارة السوبرماركت والميزان الذكي'
-                  : 'نظام إدارة الكاشير والمخزون الذكي'}
+                {storeInfo?.phone ? `تواصل: ${storeInfo.phone} - ${storeInfo.address}` : (systemScope === 'pharmacy_only' ? 'نظام إدارة الصيدليات والروشتات الذكي' : 'نظام الكاشير الذكي')}
               </p>
             </div>
           </div>

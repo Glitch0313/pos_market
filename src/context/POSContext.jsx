@@ -66,6 +66,23 @@ export function POSProvider({ children }) {
     instructions: ''
   });
 
+  // Store & Organization Profile Info
+  const [storeInfo, setStoreInfo] = useState(() => {
+    const saved = localStorage.getItem('pos_store_info');
+    return saved ? JSON.parse(saved) : {
+      name: 'فارما ماركت PRO',
+      logo: '💊',
+      phone: '01000000000',
+      taxNo: 'TAX-990-123',
+      address: 'القاهرة - شارع التحرير',
+      receiptFooter: 'نتمنى لكم دوام الصحة والعافية وشكراً لزيارتكم!'
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('pos_store_info', JSON.stringify(storeInfo));
+  }, [storeInfo]);
+
   // Current User Account State
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = sessionStorage.getItem('pos_current_user');
@@ -445,7 +462,9 @@ export function POSProvider({ children }) {
         enableAlMaida,
         setEnableAlMaida,
         currentUser,
-        setCurrentUser
+        setCurrentUser,
+        storeInfo,
+        setStoreInfo
       }}
     >
       {children}

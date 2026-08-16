@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePOS } from '../../context/POSContext';
-import { Settings, X, Shield, Package, Pill, ShoppingBag, Layers, UtensilsCrossed, Check } from 'lucide-react';
+import StoreSetupWizardModal from './StoreSetupWizardModal';
+import { Settings, X, Shield, Package, Pill, ShoppingBag, Layers, UtensilsCrossed, Check, Building2, Wand2, Sparkles } from 'lucide-react';
 
 export default function SettingsModal({ onClose }) {
-  const { systemScope, setSystemScope, enableAlMaida, setEnableAlMaida } = usePOS();
+  const { systemScope, setSystemScope, enableAlMaida, setEnableAlMaida, storeInfo } = usePOS();
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+
+  if (isWizardOpen) {
+    return <StoreSetupWizardModal onClose={() => setIsWizardOpen(false)} />;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md font-sans overflow-y-auto">
@@ -25,6 +31,27 @@ export default function SettingsModal({ onClose }) {
 
         {/* Content */}
         <div className="p-4 sm:p-6 space-y-4 overflow-y-auto text-xs sm:text-sm flex-1">
+
+          {/* Setup Store Wizard Banner Card */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-600/20 via-teal-600/20 to-cyan-600/20 border border-emerald-500/30 flex items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 font-black text-sm text-emerald-300">
+                <Building2 className="w-4 h-4 text-emerald-400" />
+                <span>إعداد مؤسسة جديدة (Onboarding Wizard)</span>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                المؤسسة الحالية: <strong className="text-white">{storeInfo?.logo} {storeInfo?.name}</strong>
+              </p>
+            </div>
+
+            <button
+              onClick={() => setIsWizardOpen(true)}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-xs hover:from-emerald-400 hover:to-teal-400 transition flex items-center gap-1.5 shadow-md flex-shrink-0"
+            >
+              <Wand2 className="w-4 h-4" />
+              <span>إدخال بيانات مؤسسة جديدة</span>
+            </button>
+          </div>
           
           {/* System Deployment Scope Option */}
           <div className="space-y-3">

@@ -4,7 +4,7 @@ import { X, Plus, Save, Package, Pill, AlertCircle } from 'lucide-react';
 import { CATEGORIES } from '../../data/initialData';
 
 export default function AddProductModal({ initialProduct, onClose }) {
-  const { saveProduct, activeMode, systemScope } = usePOS();
+  const { saveProduct, activeMode, systemScope, products } = usePOS();
 
   const defaultType = initialProduct?.type || (
     systemScope === 'pharmacy_only'
@@ -37,8 +37,32 @@ export default function AddProductModal({ initialProduct, onClose }) {
     requiresPrescription: initialProduct?.requiresPrescription || false,
     dosageInfo: initialProduct?.dosageInfo || '',
     batchNo: initialProduct?.batches?.[0]?.batchNo || 'B-' + Math.floor(1000 + Math.random() * 9000),
-    expiryDate: initialProduct?.batches?.[0]?.expiryDate || '2027-06-30'
+    expiryDate: initialProduct?.batches?.[0]?.expiryDate || '2027-06-30',
+    alternatives: initialProduct?.alternatives || []
   });
+
+  const [newAlternativeInput, setNewAlternativeInput] = useState('');
+
+  const pharmacyProducts = products ? products.filter((p) => p.type === 'pharmacy') : [];
+
+  const handleAddAlternative = (altName) => {
+    const name = altName || newAlternativeInput.trim();
+    if (!name) return;
+    if (!formData.alternatives.includes(name)) {
+      setFormData({
+        ...formData,
+        alternatives: [...formData.alternatives, name]
+      });
+    }
+    setNewAlternativeInput('');
+  };
+
+  const handleRemoveAlternative = (nameToRemove) => {
+    setFormData({
+      ...formData,
+      alternatives: formData.alternatives.filter((alt) => alt !== nameToRemove)
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -329,6 +353,83 @@ export default function AddProductModal({ initialProduct, onClose }) {
                     <option value="فوار">فوار (Effervescent)</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Medicine Alternatives Linker Section (Pharmacy Only) */}
+              <div className="space-y-2 pt-3 border-t border-cyan-900/40">
+                <label className="font-bold text-cyan-300 flex items-center justify-between text-xs sm:text-sm">
+                  <span>🔗 ربط الأدوية البديلة والمكافئة (Alternatives):</span>
+                  <span className="text-[11px] text-slate-400 font-normal">تظهر للكاشير عند طلب بدائل الصنف</span>
+                </label>
+
+                {/* Quick Linked Tags */}
+                {formData.alternatives && formData.alternatives.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 p-2 rounded-xl bg-slate-950/80 border border-slate-800">
+                    {formData.alternatives.map((alt) => (
+                      <span
+                        key={alt}
+                        className="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold flex items-center gap-1.5"
+                      >
+                        <span>💊 {alt}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAlternative(alt)}
+                          className="hover:text-rose-400 font-black text-xs transition"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Custom Input & Add Button */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newAlternativeInput}
+                    onChange={(e) => setNewAlternativeInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddAlternative();
+                      }
+                    }}
+                    placeholder="اكتب اسم دواء بديل واضغط إضافة..."
+                    className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAddAlternative()}
+                    className="px-3.5 py-2 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold hover:bg-cyan-500/30 text-xs flex items-center gap-1 transition"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>ربط كبديل</span>
+                  </button>
+                </div>
+
+                {/* Quick Suggestion Pills from Existing Pharmacy Products */}
+                {pharmacyProducts.length > 0 && (
+                  <div className="space-y-1 pt-1">
+                    <span className="text-[11px] text-slate-400 block font-bold">
+                      💡 اختيارات سريعة من أدوية الصيدلية المتاحة بالنظام:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1">
+                      {pharmacyProducts
+                        .filter((p) => p.name !== formData.name && !formData.alternatives.includes(p.name))
+                        .map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => handleAddAlternative(p.name)}
+                            className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-cyan-950/60 border border-slate-800 hover:border-cyan-500/40 text-[11px] text-slate-300 hover:text-cyan-300 transition flex items-center gap-1 font-bold"
+                          >
+                            <span>+ {p.name}</span>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
